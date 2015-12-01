@@ -1,0 +1,28 @@
+{
+  "name": "nws-gauges",
+  "version": "0.0.1",
+  "description": "get river gauge data from the National Weather Service (NWS) Advanced Hydrologic Prediction Service (AHPS)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tnris/nws-gauges.git"
+  },
+  "keywords": [
+    "noaa",
+    "nws",
+    "river",
+    "gage",
+    "gauge",
+    "data",
+    "flood"
+  ],
+  "author": "andy wilson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tnris/nws-gauges/issues"
+  },
+  "homepage": "https://github.com/tnris/nws-gauges#readme"
+}
