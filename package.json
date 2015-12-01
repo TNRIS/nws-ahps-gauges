@@ -24,5 +24,9 @@
   "bugs": {
     "url": "https://github.com/tnris/nws-gauges/issues"
   },
-  "homepage": "https://github.com/tnris/nws-gauges#readme"
+  "homepage": "https://github.com/tnris/nws-gauges#readme",
+  "dependencies": {
+    "ramda": "^0.18.0",
+    "request": "^2.67.0"
+  }
 }
