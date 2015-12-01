@@ -26,6 +26,8 @@
   },
   "homepage": "https://github.com/tnris/nws-gauges#readme",
   "dependencies": {
+    "JSONStream": "^1.0.7",
+    "event-stream": "^3.3.2",
     "ramda": "^0.18.0",
     "request": "^2.67.0"
   }
