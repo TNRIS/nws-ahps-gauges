@@ -1,10 +1,9 @@
+var cheerio = require('cheerio')
 var es = require('event-stream');
 var JSONStream = require('JSONStream');
+var point = require('turf-point')
 var R = require('ramda');
 var request = require('request');
-var point = require('turf-point')
-
-var MAP_POINTS_URL = 'http://water.weather.gov/ahps/get_map_points.php'
 
 
 function stream(key, options) {
@@ -23,7 +22,7 @@ function stream(key, options) {
   var form = R.merge(defaults, options);
   form.key = key;
 
-  return request.post(MAP_POINTS_URL)
+  return request.post('http://water.weather.gov/ahps/get_map_points.php')
     .form(form)
     .pipe(JSONStream.parse())
     .pipe(es.through(function write(data) {
@@ -35,7 +34,7 @@ function stream(key, options) {
 
 function geojsonify(options) {
   var throughStream = es.map(function(data, callback) {
-    var coordinates = [data.longitude, data.latitude];
+    var coordinates = [Number(data.longitude), Number(data.latitude)];
     var properties = R.omit(['latitude', 'longitude'], data);
 
     var feature = point(coordinates, properties);
@@ -47,7 +46,78 @@ function geojsonify(options) {
   return throughStream;
 }
 
+// returns metadata for a ga(u)ge
+function metadata(id) {
+  var url = 'http://water.weather.gov/ahps2/metadata.php?wfo=fwd&gage=' + String(id);
+
+  return request.get(url)
+    .pipe(es.wait())
+    .pipe(es.map(function (data, callback) {
+      var obj = {};
+      var $ = cheerio.load(data.toString());
+
+      var h2text = $('h2').text();
+      obj.name = h2text.split('Metadata for ')[1].split('(')[0].trim();
+      obj.code = h2text.split('(')[1].split(')')[0].trim();
+
+      var locationText = $('table table tr td').first().text();
+      try {
+        var latitudeString = locationText.split('Latitude: ')[1].split('°')[0];
+        var latitudeDirection = locationText.split('Latitude: ')[1].split('°')[1].split(',')[0].trim();
+        var latitudeMultiplier = latitudeDirection && latitudeDirection === 'S' ? -1 : 1;
+        obj.latitude = Number(latitudeString) * latitudeMultiplier;
+      } catch (e) {}
+      try {
+        var longitudeString = locationText.split('Longitude: ')[1].split('°')[0];
+        var longitudeDirection = locationText.split('Longitude: ')[1].split('°')[1].split(',')[0].trim();
+        var longitudeMultiplier = longitudeDirection && longitudeDirection === 'W' ? -1 : 1;
+        obj.longitude = Number(longitudeString) * longitudeMultiplier;
+      } catch (e) {}
+      try {
+        obj.horizontalDatum = locationText.split('Horizontal Datum:')[1].split('\n')[1].trim();
+      } catch (e) {}
+
+      var referenceTable = $('table table table').first();
+
+      function getRowCol(row, col) {
+        return $($(referenceTable.find('tr').get(row)).find('td').get(col)).text().trim();
+      }
+
+      var reference = {}
+      referenceTable.find('tr').each(function (idx, element) {
+        try {
+          var referenceName = $($(element).find('td').get(0)).text().trim();
+          if (referenceName && referenceName !== 'Vertical Datum') {
+            reference[referenceName] = {};
+            try {
+              reference[referenceName].base = $($(element).find('td').get(1)).text().trim();
+            } catch (e) {}
+            try {
+              reference[referenceName].flood = $($(element).find('td').get(2)).text().trim();
+            } catch (e) {}
+          }
+        } catch (e) {}
+      });
+      obj['reference'] = reference;
+
+      var otherSources = [];
+      var otherSourcesTable = $('table table table').last();
+      otherSourcesTable.find('a').each(function (idx, element) {
+        var source = {};
+        source.name = $(element).text();
+        source.href = $(element).attr('href');
+        otherSources.push(source);
+      });
+      if(otherSources.length) {
+        obj['otherSources'] = otherSources;
+      }
+
+      callback(null, obj);
+    }));
+}
+
 module.exports = {
-  stream: stream,
   geojsonify: geojsonify,
+  metadata: metadata,
+  stream: stream,
 }
