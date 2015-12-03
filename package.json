@@ -32,5 +32,8 @@
     "ramda": "^0.18.0",
     "request": "^2.67.0",
     "turf-point": "^2.0.1"
+  },
+  "devDependencies": {
+    "turf-featurecollection": "^1.0.1"
   }
 }
