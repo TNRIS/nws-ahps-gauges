@@ -7,7 +7,7 @@ var es = require('event-stream');
 var nwsGauges = require('../index.js');
 
 nwsGauges.stream('tx')
-  .pipe(nwsGauges.geojsonify())
+  .pipe(nwsGauges.geojsonify({style: true}))
   .pipe(es.writeArray(function(err, features) {
     var fc = featurecollection(features);
     es.readArray([fc])

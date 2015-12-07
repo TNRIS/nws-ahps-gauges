@@ -33,12 +33,51 @@ function stream(key, options) {
 };
 
 function geojsonify(options) {
+  options = options || {};
+  options = R.merge({
+    style: false,
+    links: true,
+  }, options);
+
   var throughStream = es.map(function(data, callback) {
     var coordinates = [Number(data.longitude), Number(data.latitude)];
     var properties = R.omit(['latitude', 'longitude'], data);
 
     var feature = point(coordinates, properties);
     feature.id = properties.lid;
+
+    if(options.style) {
+      var style = {
+        'marker-size': 'medium',
+      };
+
+      if (properties.obs_status) {
+        style['marker-color'] = '#' + properties.obs_status;
+      }
+
+      if (properties.icon) {
+        var icon = properties.icon.split('-')[0];
+
+        if (icon === 'ci') {
+          style['marker-symbol'] = 'circle';
+        } else if (icon === 'di') {
+          style['marker-symbol'] = 'triangle';
+        } else if (icon === 'sq') {
+          style['marker-symbol'] = 'square';
+        }
+      }
+
+      if (properties.name && properties.lid) {
+        style.title = properties.lid.toUpperCase() + ': ' + properties.name;
+      }
+
+      feature.properties = R.merge(style, feature.properties);
+    }
+
+    if (options.links) {
+      feature.properties.hydrograph_link = 'http://water.weather.gov/ahps2/hydrograph.php?wfo=' + properties.wfo + '&gage=' + properties.lid;
+      feature.properties.hydrograph_image = 'http://water.weather.gov/resources/hydrographs/' + properties.lid + '_hg.png';
+    }
 
     callback(null, feature);
   });
