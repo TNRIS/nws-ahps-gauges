@@ -1,5 +1,5 @@
 {
-  "name": "nws-gauges",
+  "name": "nws-ahps-gauges",
   "version": "0.0.1",
   "description": "get river gauge data from the National Weather Service (NWS) Advanced Hydrologic Prediction Service (AHPS)",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tnris/nws-gauges.git"
+    "url": "git+https://github.com/tnris/nws-ahps-gauges.git"
   },
   "keywords": [
     "noaa",
@@ -22,9 +22,9 @@
   "author": "andy wilson",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tnris/nws-gauges/issues"
+    "url": "https://github.com/tnris/nws-ahps-gauges/issues"
   },
-  "homepage": "https://github.com/tnris/nws-gauges#readme",
+  "homepage": "https://github.com/tnris/nws-ahps-gauges#readme",
   "dependencies": {
     "JSONStream": "^1.0.7",
     "cheerio": "^0.19.0",
