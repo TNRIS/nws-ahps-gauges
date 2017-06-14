@@ -1,6 +1,6 @@
 {
   "name": "nws-ahps-gauges",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "get river gauge data from the National Weather Service (NWS) Advanced Hydrologic Prediction Service (AHPS)",
   "main": "index.js",
   "scripts": {
